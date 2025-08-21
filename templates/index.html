@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <title>Needle Inventory</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet"/>
+    <style>
+    body { padding: 20px; }
+    .filter-card { margin-bottom: 20px; }
+    .pagination { justify-content: center; }
+    </style>
+    <link href="{{ url_for('static', filename='style.css') }}" rel="stylesheet"/>
+</head>
+<body>
+    <div class="container">
+    <h2 class="mb-4">Needle Inventory Report</h2>
+
+    <div class="card filter-card">
+        <div class="card-body">
+        <form class="row g-3" method="GET">
+            <!-- Factory Dropdown -->
+            <div class="col-md-3">
+            <label class="form-label" for="factory">Factory</label>
+            <select class="form-select select2" id="factory" name="factory">
+                <option value="">All</option>
+                    {% for factory in factories %}
+                <option value="{{ factory }}" {% if factory == current_factory %}selected{% endif %}>
+                    {{ factory }}
+                </option>
+                {% endfor %}
+            </select>
+            </div>
+
+            <!-- Location Dropdown -->
+            <div class="col-md-3">
+            <label class="form-label" for="location">Stock Location</label>
+            <select class="form-select select2" id="location" name="location">
+                <option value="">All</option>
+                    {% for location in locations %}
+                <option value="{{ location }}" {% if location == current_location %}selected{% endif %}>
+                    {{ location }}
+                </option>
+                {% endfor %}
+            </select>
+            </div>
+
+            <!-- Needle ID Dropdown -->
+            <div class="col-md-3">
+            <label class="form-label" for="needle">Needle ID</label>
+            <select class="form-select select2" id="needle" name="needle">
+                <option value="">All</option>
+                {% for needle in needles %}
+                <option value="{{ needle }}" {% if needle == current_needle %}selected{% endif %}>
+                    {{ needle }}
+                </option>
+                {% endfor %}
+            </select>
+            </div>
+
+            <!-- Buttons -->
+            <div class="col-md-3 d-flex align-items-end">
+            <button class="btn btn-primary me-2" type="submit">Apply Filters</button>
+            <a class="btn btn-secondary" href="/">Clear Filters</a>
+            </div>
+        </form>
+        </div>
+    </div>
+
+    <!-- Inventory Table -->
+    <table class="table table-bordered table-striped">
+        <thead>
+        <tr>
+            <th>Factory</th>
+            <th>Stock Location</th>
+            <th>Needle ID</th>
+            <th>Designation</th>
+            <th>Minimum Stock</th>
+            <th>Current Stock</th>
+            <th>Target Stock</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for row in tables %}
+            <tr>
+            <td>{{ row['factory'] }}</td>
+            <td>{{ row['stock location'] }}</td>
+            <td>{{ row['needle id'] }}</td>
+            <td>{{ row['designation'] }}</td>
+            <td>{{ row['minimum stock level'] }}</td>
+            <td>{{ row['current stock level'] }}</td>
+            <td>{{ row['target stock level'] }}</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    <!-- Pagination -->
+    <nav>
+        <ul class="pagination">
+        {% if page > 1 %}
+            <li class="page-item">
+            <a class="page-link" href="?factory={{ current_factory }}&location={{ current_location }}&needle={{ current_needle }}&page={{ page - 1 }}">Previous</a>
+            </li>
+        {% endif %}
+        {% for p in range(1, total_pages + 1) %}
+            <li class="page-item {% if p == page %}active{% endif %}">
+            <a class="page-link" href="?factory={{ current_factory }}&location={{ current_location }}&needle={{ current_needle }}&page={{ p }}">{{ p }}</a>
+            </li>
+        {% endfor %}
+        {% if page < total_pages %}
+            <li class="page-item">
+            <a class="page-link" href="?factory={{ current_factory }}&location={{ current_location }}&needle={{ current_needle }}&page={{ page + 1 }}">Next</a>
+            </li>
+        {% endif %}
+        </ul>
+    </nav>
+
+    <!-- Export Buttons -->
+    <div style="text-align: center; margin-top: 20px;">
+        <a href="/export/csv?factory={{ current_factory }}&location={{ current_location }}&needle={{ current_needle }}"><button>Export CSV</button></a>
+        <a href="/export/excel?factory={{ current_factory }}&location={{ current_location }}&needle={{ current_needle }}"><button>Export Excel</button></a>
+        <a href="/export/pdf?factory={{ current_factory }}&location={{ current_location }}&needle={{ current_needle }}"><button>Export PDF</button></a>
+    </div>
+</div>
+
+    <!-- JS Dependencies -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <script>
+    $(document).ready(function() {
+        $('.select2').select2({ width: '100%' });
+    });
+    </script>
+</body>
+</html>
